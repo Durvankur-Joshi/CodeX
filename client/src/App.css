@@ -1,0 +1,25 @@
+/* Light Mode Styles */
+body.light-mode {
+    background-color: #ffffff;
+    color: #333333;
+  }
+  
+  /* Ensure components follow the light-mode style */
+  body.light-mode .bg-gray-800 {
+    background-color: #f0f0f0;
+    
+  }
+  
+  body.light-mode .text-gray-300 {
+    color: #333333;
+  }
+  
+  /* Button and other elements */
+  body.light-mode .bg-green-400 {
+    background-color: #4caf50;
+  }
+  
+  body.light-mode .hover\\:bg-gray-700:hover {
+    background-color: #dddddd;
+  }
+  
