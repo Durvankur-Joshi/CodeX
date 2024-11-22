@@ -4,29 +4,60 @@ import '../App.css';
 import GridCard from '../components/GridCard';
 import ListCard from '../components/ListCard';
 import { IoMdAdd } from "react-icons/io";
+import DeleteProject from '../components/DeleteProject';
+import CreateNewProject from '../components/CreateNewProject'; // Import CreateNewProject modal component
 
 const Home = () => {
-  // State for layout toggle (Grid/List)
   const [isGridLayout, setIsGridLayout] = useState(true);
-
-  // State for light mode toggle
   const [isLightMode, setIsLightMode] = useState(false);
+  
+  // State to control Delete Project modal
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [targetProject, setTargetProject] = useState(null);
 
-  // Function to handle layout toggle
+  // State to control Create New Project modal
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const toggleLayout = () => {
     setIsGridLayout((prevLayout) => !prevLayout);
   };
 
-  // Function to handle theme toggle
   const toggleTheme = () => {
     setIsLightMode((prevMode) => !prevMode);
-    // Add/Remove the light mode class to the body
     document.body.classList.toggle('light-mode', !isLightMode);
+  };
+
+  // Function to handle opening the delete modal
+  const handleDeleteClick = (projectName) => {
+    setTargetProject(projectName);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Function to handle closing the delete modal
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setTargetProject(null);
+  };
+
+  // Function to handle opening the create new project modal
+  const openCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  // Function to handle closing the create new project modal
+  const closeCreateModal = () => {
+    setIsCreateModalOpen(false);
+  };
+
+  // Function to handle creating a new project (example function)
+  const handleCreateProject = (newProject) => {
+    console.log('New project created:', newProject);
+    // Add logic here to update your projects list with the new project
+    closeCreateModal();
   };
 
   return (
     <>
-      {/* Navbar Component */}
       <Navbar
         toggleLayout={toggleLayout}
         toggleTheme={toggleTheme}
@@ -34,18 +65,13 @@ const Home = () => {
         isGridLayout={isGridLayout}
       />
 
-      {/* Main Container */}
       <div className='px-10 py-8'>
-        {/* Top Section: Greeting & Search */}
         <div className='flex flex-col md:flex-row items-center justify-between mb-8'>
-          {/* Greeting Message */}
           <h2 className='text-3xl font-semibold text-green-400 mb-6 md:mb-0'>
             Hi Durvankur
           </h2>
 
-          {/* Search Bar and Add Button Container */}
           <div className='flex items-center gap-4 w-full md:w-auto'>
-            {/* Search Bar */}
             <div className='w-full max-w-md'>
               <label className='relative block'>
                 <input
@@ -53,7 +79,6 @@ const Home = () => {
                   placeholder='Search Project'
                   className='w-full px-4 py-2 rounded-md bg-gray-800 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-400'
                 />
-                {/* Search Icon */}
                 <span className='absolute right-3 top-2.5'>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
@@ -70,35 +95,46 @@ const Home = () => {
                 </span>
               </label>
             </div>
-
-            {/* Add Project Button */}
-            <button className='bg-green-400 rounded-lg px-4 py-2 text-xl text-white hover:bg-green-500 transition'>
+            <button
+              className='bg-green-400 rounded-lg px-4 py-2 text-xl text-white hover:bg-green-500 transition'
+              onClick={openCreateModal} // Open CreateNewProject modal
+            >
               <IoMdAdd />
             </button>
           </div>
         </div>
 
-        {/* Project Cards Section */}
         <div className=''>
           {isGridLayout ? (
-            // Grid Layout
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-              <GridCard projectName="My first project" creationDate="9 mon 2023" />
-              <GridCard projectName="My Second project" creationDate="9 mon 2023" />
-              <GridCard projectName="My Third project" creationDate="9 mon 2023" />
-              <GridCard projectName="My Third project" creationDate="9 mon 2023" />
-              <GridCard projectName="My Third project" creationDate="9 mon 2023" />
-              
+              <GridCard projectName="My first project" creationDate="9 mon 2023" onDelete={handleDeleteClick} />
+              <GridCard projectName="My Second project" creationDate="9 mon 2023" onDelete={handleDeleteClick} />
+              <GridCard projectName="My Third project" creationDate="9 mon 2023" onDelete={handleDeleteClick} />
             </div>
           ) : (
-            // List Layout
             <div className='space-y-4'>
-              <ListCard projectName="My first project" creationDate="9 mon 2023" />
-              <ListCard projectName="My Second project" creationDate="9 mon 2023" />
-              <ListCard projectName="My Third project" creationDate="9 mon 2023" />
+              <ListCard projectName="My first project" creationDate="9 mon 2023" onDelete={handleDeleteClick} />
+              <ListCard projectName="My Second project" creationDate="9 mon 2023" onDelete={handleDeleteClick} />
+              <ListCard projectName="My Third project" creationDate="9 mon 2023" onDelete={handleDeleteClick} />
             </div>
           )}
         </div>
+
+        {/* Delete Project Modal */}
+        {isDeleteModalOpen && (
+          <DeleteProject 
+            projectName={targetProject} 
+            onClose={closeDeleteModal} 
+          />
+        )}
+
+        {/* Create New Project Modal */}
+        {isCreateModalOpen && (
+          <CreateNewProject 
+            onClose={closeCreateModal} 
+            onCreate={handleCreateProject} 
+          />
+        )}
       </div>
     </>
   );
