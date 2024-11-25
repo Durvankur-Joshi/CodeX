@@ -1,59 +1,110 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { compare } from 'bcrypt';
+import pkg from 'jsonwebtoken';
 
-// User Signup
-export const signup = async (req, res) => {
-  const { username, email, password } = req.body;
+const { sign } = pkg;
+
+const maxAge = 3* 24 * 60 * 60 * 100 ; 
+
+const createToken = (email, userId) => {
+  return sign({ email, userId }, process.env.JWT_KEY, { expiresIn: maxAge });
+};
+
+export const register = async (req, res, next) => {
   try {
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+    // Destructure email and password from req.body
+    const { username , email, password } = req.body;
+
+    // Check if email or password is missing
+    if (!email || !password) {
+      return res.status(400).send("Email and password are required");
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Create a new user
+    const user = await User.create({ username ,email, password });
 
-    // Create new user
-    const newUser = new User({ username, email, password: hashedPassword });
-    await newUser.save();
+    // Create a JWT token and set the cookie
+    res.cookie("jwt", createToken(email, user.id), {
+      maxAge,
+      secure: true,
+      sameSite: "None",
+    });
 
-    // Corrected: Use a single response object
-    res.status(201).json({
-      message: 'User registered successfully',
-      newUser: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-      }
+    // Return the user details in the response
+    return res.status(200).json({
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating user', error: error.message });
+    console.log(error);
+    return res.status(500).send("Internal server error");
   }
 };
 
-// User Login
-export const login = async (req, res) => {
-  const { email, password } = req.body;
+
+
+export const login = async (req, res, next) => {
   try {
-    // Find user by email
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).send("Email and Password are required.");
+    }
+
+    // Correct the User model reference here
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).send("User with the given email is not found.");
     }
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Invalid password' });
+    const auth = await compare(password, user.password);
+    if (!auth) {
+      return res.status(400).send("Password is incorrect.");
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // Correct the 'res' object usage
+    res.cookie("jwt", createToken(email, user._id), {
+      maxAge,
+      secure: true,
+      sameSite: "None",
+    });
 
-    res.status(200).json({ message: 'Login successful', token });
+    return res.status(200).json({
+      user: {
+        id: user._id,
+        email: user.email,
+        username:user.username
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error logging in', error: error.message });
+    console.log(error);
+    return res.status(500).send("Internal server error");
   }
 };
+
+
+export const getUserInfo = async (req, res) => {
+  try {
+    console.log("Request received with userID:", req.userID);  
+
+    const userData = await User.findById(req.userID); 
+    if (!userData) {
+      return res.status(404).send("User with this ID not found");
+    }
+
+    return res.status(200).json({
+      id: userData._id,
+      email: userData.email,
+      username:userData.username
+    });
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    return res.status(500).send("Internal server error");
+  }
+};
+
