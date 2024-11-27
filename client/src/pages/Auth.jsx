@@ -2,18 +2,17 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAppStore } from '../store/store';
+import { apiClient } from '../lib/api-client';
+import { LOGIN_ROUTES, SIGNUP_ROUTES } from '../utils/constants.js';
 
 const Auth = () => {
   const navigate = useNavigate();
   const [activeForm, setActiveForm] = useState('signup');
+  const { setUserInfo } = useAppStore(); // Use the Zustand's setUserInfo directly
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  // Mock setUserInfo function (adjust as per your user management)
-  const setUserInfo = (user) => {
-    console.log('User Info Set:', user);
-  };
 
   // Toggle form visibility
   const showForm = (form) => {
@@ -23,68 +22,94 @@ const Auth = () => {
     setPassword('');
   };
 
+  const validateSignin = () => {
+    if (!username.length) {
+      toast.error("Username is required")
+      return false;
+    }
+    if (!email.length) {
+      toast.error('Email is required');
+      return false;
+    }
+    if (!password.length) {
+      toast.error('Password is required');
+      return false;
+    }
+    return true;
+  };
+
+  // Signup submission handler
   const handleSignUp = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('http://localhost:3000/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password }),
-      });
+    e.preventDefault(); // Prevent default form submission behavior
+    if (validateSignin()) {
 
-      const data = await response.json();
-      console.log('Signup Response Data:', data); // Debugging line
+      try {
 
-      if (response.ok) {
+       const response = await apiClient.post(SIGNUP_ROUTES,{username , email , password } ,{withCredentials:true})
+
+       if (response.status === 200) { // assuming signup returns a 201 Created status
         toast.success('Signup successful!');
-        navigate('/');
-        setUserInfo(data.user);
+        navigate("/");
+        setUserInfo(response.data.user);
+        console.log(response.data.user)
       } else {
-        toast.error(data.message || 'Signup failed');
+        toast.error('Unexpected response. Please try again.');
       }
-    } catch (error) {
-      console.error('Error during signup:', error);
-      toast.error('An error occurred during signup. Please try again.');
+
+      } catch (error) {
+        console.error('Error during signup:', error);
+        toast.error('An error occurred during signup. Please try again.');
+      }
     }
   };
 
+  // Validate login form
+  const validateLogin = () => {
+    if (!email.length) {
+      toast.error('Email is required');
+      return false;
+    }
+    if (!password.length) {
+      toast.error('Password is required');
+      return false;
+    }
+    return true;
+  };
+
+  // Handle login submission
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    e.preventDefault(); // Prevent default form submission behavior
+    if (validateLogin()) {
+      try {
+        // Make the login request with credentials
+        const response = await apiClient.post(
+          LOGIN_ROUTES,
+          { email, password },
+          { withCredentials: true }
+        );
+        
 
-      const data = await response.json();
-      console.log('Login Response Data:', data); // Debugging line
-
-      if (response.ok) {
-        toast.success('Login successful!');
-        localStorage.setItem('token', data.token);
-        navigate('/');
-        setUserInfo(data.user);
-      } else {
-        toast.error(data.message || 'Login failed');
+        // Check if the user object exists in the response
+        if (response.data && response.data.user && response.data.user.id) {
+          toast.success('Login successful!');
+          setUserInfo(response.data.user);
+          console.log(response.data.user)
+          navigate('/'); // Redirect to the home page
+        } else {
+          toast.error("Login failed: User not found");
+        }
+      } catch (error) {
+        toast.error("Error during login: Invalid credentials");
+        console.error("Error during login:", error);
       }
-    } catch (error) {
-      console.error('Error during login:', error);
-      toast.error('An error occurred during login. Please try again.');
     }
   };
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-900 text-white">
-      {/* ToastContainer for notifications */}
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
 
       <div className="container max-w-5xl flex rounded-2xl shadow-lg overflow-hidden bg-gray-800">
-        {/* Left Panel for Slogan and Welcome Message */}
         <div className="w-1/2 p-12 flex flex-col justify-center items-center bg-gray-900">
           <h1 className="text-4xl font-bold text-green-400 mb-4">Welcome to CodeX</h1>
           <p className="text-lg text-gray-400 leading-relaxed text-center">
@@ -92,11 +117,9 @@ const Auth = () => {
           </p>
         </div>
 
-        {/* Right Panel for Form */}
         <div className="w-1/2 p-12 relative">
           <div className="text-3xl font-bold text-green-400 text-center mb-8">CodeX</div>
 
-          {/* Tabs for switching between Login and Signup */}
           <div className="flex justify-center mb-8">
             <button
               className={`px-4 py-2 font-semibold rounded-lg transition-colors ml-4 ${
@@ -116,13 +139,10 @@ const Auth = () => {
             </button>
           </div>
 
-          {/* Login Form */}
           {activeForm === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="relative">
-                <label htmlFor="login-email" className="block text-sm text-gray-400 mb-1">
-                  Email
-                </label>
+                <label htmlFor="login-email" className="block text-sm text-gray-400 mb-1">Email</label>
                 <input
                   type="email"
                   placeholder="Enter your email"
@@ -133,9 +153,7 @@ const Auth = () => {
                 />
               </div>
               <div className="relative">
-                <label htmlFor="login-password" className="block text-sm text-gray-400 mb-1">
-                  Password
-                </label>
+                <label htmlFor="login-password" className="block text-sm text-gray-400 mb-1">Password</label>
                 <input
                   type="password"
                   placeholder="Enter your password"
@@ -154,13 +172,10 @@ const Auth = () => {
             </form>
           )}
 
-          {/* Signup Form */}
           {activeForm === 'signup' && (
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="relative">
-                <label htmlFor="signup-username" className="block text-sm text-gray-400 mb-1">
-                  Username
-                </label>
+                <label htmlFor="signup-username" className="block text-sm text-gray-400 mb-1">Username</label>
                 <input
                   type="text"
                   placeholder="Enter Username"
@@ -171,9 +186,7 @@ const Auth = () => {
                 />
               </div>
               <div className="relative">
-                <label htmlFor="signup-email" className="block text-sm text-gray-400 mb-1">
-                  Email
-                </label>
+                <label htmlFor="signup-email" className="block text-sm text-gray-400 mb-1">Email</label>
                 <input
                   type="email"
                   placeholder="Create an email"
@@ -184,9 +197,7 @@ const Auth = () => {
                 />
               </div>
               <div className="relative">
-                <label htmlFor="signup-password" className="block text-sm text-gray-400 mb-1">
-                  Password
-                </label>
+                <label htmlFor="signup-password" className="block text-sm text-gray-400 mb-1">Password</label>
                 <input
                   type="password"
                   placeholder="Enter password"
