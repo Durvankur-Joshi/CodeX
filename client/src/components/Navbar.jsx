@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdLightMode, MdDarkMode } from "react-icons/md";
 import { IoGrid, IoList } from "react-icons/io5";
+import axios from 'axios';
+import {useAppStore} from "../store/store.js"
 
 const Navbar = ({ toggleTheme, toggleLayout, isLightMode, isGridLayout }) => {
-  // Container class based on dark or light mode
+
+  const { userInfo , setUserInfo} = useAppStore();
+
   const navbarClass = isLightMode ? 'bg-white text-gray-900' : 'bg-gray-900 text-white';
   const dropdownClass = isLightMode ? 'bg-base-100 text-white' : 'bg-gray-800';
 
@@ -49,12 +53,15 @@ const Navbar = ({ toggleTheme, toggleLayout, isLightMode, isGridLayout }) => {
         
         <div className="navbar-end">
           <div className="dropdown dropdown-end">
-            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-              <div className="w-10 rounded-full">
-                <img
-                  alt="Tailwind CSS Navbar component"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
-              </div>
+          <div
+      tabIndex={0}
+      role="button"
+      className="btn btn-ghost btn-circle avatar hover:bg-gray-700 focus:ring-2 focus:ring-green-400"
+    >
+            <div className="w-10 h-10 rounded-full bg-green-400 text-gray-900 text-lg font-bold flex items-center justify-center shadow-md">
+        {/* Display the first character of the username safely */}
+        {userInfo && userInfo.username ? userInfo.username.charAt(0).toUpperCase() : 'U'}
+      </div>
             </div>
             
             <ul
@@ -63,7 +70,8 @@ const Navbar = ({ toggleTheme, toggleLayout, isLightMode, isGridLayout }) => {
               
               {/* User Information */}
               <li className='items-center p-0'>
-                <h3 className='text-2xl'>Durvankur</h3>
+                <h3 className='text-2xl uppercase'> {userInfo && userInfo.username ? userInfo.username : 'Guest'}</h3>
+                <p className='text-slate-300'>{userInfo.email}</p>
               </li>
               <div className="divider"></div>
               
