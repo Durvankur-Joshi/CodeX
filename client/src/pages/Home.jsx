@@ -6,10 +6,12 @@ import ListCard from '../components/ListCard';
 import { IoMdAdd } from "react-icons/io";
 import DeleteProject from '../components/DeleteProject';
 import CreateNewProject from '../components/CreateNewProject'; // Import CreateNewProject modal component
+import { useAppStore } from '../store/store';
 
 const Home = () => {
   const [isGridLayout, setIsGridLayout] = useState(true);
   const [isLightMode, setIsLightMode] = useState(false);
+  const {userInfo} = useAppStore()
   
   // State to control Delete Project modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -68,7 +70,7 @@ const Home = () => {
       <div className='px-10 py-8'>
         <div className='flex flex-col md:flex-row items-center justify-between mb-8'>
           <h2 className='text-3xl font-semibold text-green-400 mb-6 md:mb-0'>
-            Hi Durvankur
+            Hi {userInfo.username}👋
           </h2>
 
           <div className='flex items-center gap-4 w-full md:w-auto'>
