@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import authRoutes from "./Routes/authRoutes.js"
 import cookieParser from "cookie-parser";
+import projectRoutes from './Routes/projectRoutes.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(cookieParser());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/' , projectRoutes)
 
 // Basic Route
 app.get('/', (req, res) => {
