@@ -7,6 +7,7 @@ const projectSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  
   htmlCode: {
     type: String,
     default: `
@@ -32,10 +33,12 @@ const projectSchema = new mongoose.Schema({
       box-sizing: border-box;
     }`,
   },
+
   jsCode: {
     type: String,
     default: 'console.log("Hello World")',
   },
 });
+
 
 module.exports = mongoose.model("Project", projectSchema);
