@@ -86,6 +86,7 @@ router.post("/createProject", async (req, res) => {
   }
 });
 
+
 router.post("/getProjects", async (req, res) => {
   let { userId } = req.body;
   let user = await userModel.findOne({ _id: userId });
