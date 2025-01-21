@@ -1,0 +1,47 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+
+# Logs
+logs/
+*.log
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build and generated files
+dist/
+build/
+*.out
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE and editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Git files
+.git/
+*.gitignore
+
+# Temporary files
+*.swp
+*.tmp
+*.bak
+*.orig
+
+# Testing files
+coverage/
+*.lcov
+
+# Ignore all hidden files except .gitignore
+.*
+!.gitignore
