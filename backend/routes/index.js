@@ -36,6 +36,8 @@ router.post("/signUp", async (req, res) => {
   }
 });
 
+
+
 router.post("/login", async (req, res) => {
   let { email, password } = req.body;
   let user = await userModel.findOne({ email: email });
