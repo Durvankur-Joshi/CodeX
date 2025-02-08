@@ -11,5 +11,8 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Export the mongoose instance for reusability in other modules
+
+
+
+  
 module.exports = mongoose;
