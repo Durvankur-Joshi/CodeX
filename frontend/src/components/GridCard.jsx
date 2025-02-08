@@ -36,4 +36,5 @@ const GridCard = ({item}) => {
   )
 }
 
+
 export default GridCard
