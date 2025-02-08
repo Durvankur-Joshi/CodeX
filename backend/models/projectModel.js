@@ -24,6 +24,7 @@ const projectSchema = new mongoose.Schema({
     </body>
     </html>`,
   },
+  
   cssCode: {
     type: String,
     default: `
